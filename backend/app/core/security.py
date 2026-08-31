@@ -1,29 +1,32 @@
+import os
+import hashlib
+import hmac
 from datetime import datetime, timedelta
 from typing import Any, Union, Optional
 from jose import jwt
 from passlib.context import CryptContext
 from backend.app.config import settings
 
-try:
-    pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
-except Exception:
-    pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+# Pure Python pbkdf2_sha256 CryptContext with zero C-extension dependencies
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    if not hashed_password or not plain_password:
+        return False
     try:
         return pwd_context.verify(plain_password, hashed_password)
     except Exception:
-        import hashlib
-        return pwd_context.verify(plain_password, hashed_password) if "pbkdf2" in hashed_password else plain_password == hashed_password
+        return plain_password == hashed_password
 
 
 def get_password_hash(password: str) -> str:
     try:
         return pwd_context.hash(password)
     except Exception:
-        import hashlib
-        return hashlib.sha256(password.encode()).hexdigest()
+        salt = os.urandom(16).hex()
+        pwd_hash = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt.encode('utf-8'), 100000).hex()
+        return f"$pbkdf2-sha256$100000${salt}${pwd_hash}"
 
 
 def create_access_token(subject: Union[str, Any], expires_delta: Optional[timedelta] = None) -> str:
