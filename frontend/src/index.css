@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    transition: font-size 0.2s ease, background-color 0.2s ease;
+  }
+}
+
+/* Accessibility Font Scaling Classes */
+.font-scale-sm {
+  font-size: 87.5%; /* 14px base */
+}
+.font-scale-base {
+  font-size: 100%; /* 16px base */
+}
+.font-scale-lg {
+  font-size: 112.5%; /* 18px base */
+}
+
+/* High Contrast Theme Override */
+.high-contrast {
+  --bg-primary: #000000;
+  --text-primary: #ffffff;
+  --border-color: #fbbf24;
+}
+
+.high-contrast body {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .bg-white {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+  border-color: #333333 !important;
+}
+
+.high-contrast .bg-slate-50,
+.high-contrast .bg-slate-100 {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+.high-contrast .text-slate-500,
+.high-contrast .text-slate-600,
+.high-contrast .text-slate-700 {
+  color: #e2e8f0 !important;
+}
+
+/* Government Tricolor Ribbon */
+.gov-tricolor-bar {
+  height: 4px;
+  background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.33%, #FFFFFF 33.33%, #FFFFFF 66.66%, #138808 66.66%, #138808 100%);
+}
+
+.gov-seal-watermark {
+  background-image: radial-gradient(circle at center, rgba(217, 119, 6, 0.05) 0%, transparent 70%);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

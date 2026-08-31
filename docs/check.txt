@@ -1,0 +1,190 @@
+================================================================================
+  NAWI TEST REPORT GENERATOR (SIH PROBLEM STATEMENT 26035)
+  Role-Based Manual Testing Demo Data & Reviewer Approval Guide
+================================================================================
+
+This file contains comprehensive demo data structured by user roles to help you 
+manually test every single feature of the NAWI Web Application (Login, Manufacturers, 
+Instruments, Test Session Wizard, OIML R76 Calculations, Approvals, PDF/DOCX downloads).
+
+================================================================================
+1. DEFAULT LOGIN CREDENTIALS BY ROLE
+================================================================================
+
+Role             | Username   | Password     | Scope of Privileges
+-----------------|------------|--------------|--------------------------------------------------
+Admin            | admin      | Admin@123    | Full system control, User CRUD, All Reports
+Lab Technician   | tech1      | Tech@123     | Create Session, Test Wizard Data Entry, Drafts
+Reviewer         | reviewer1  | Reviewer@123 | Inspect Observations, Approve / Reject Reports
+Viewer           | viewer1    | Viewer@123   | Read-only inspection & Certificate lookup
+
+
+================================================================================
+2. HOW REVIEWER APPROVES / REJECTS A REPORT (STEP-BY-STEP)
+================================================================================
+
+[METHOD 1: Directly from Test Sessions Table]
+1. Log in as Reviewer:
+   - Username : `reviewer1`
+   - Password : `Reviewer@123`
+2. Navigate to "Test Sessions" page (http://localhost:5173/sessions).
+3. Use the "Filter Status" dropdown and select "Under Review" (or "Draft" / "In Progress").
+4. In the Actions column on the right, Reviewers and Admins see green "Approve" and red "Reject" buttons.
+5. Click "Approve":
+   - The status changes instantly to "APPROVED".
+   - The status badge turns green with a checkmark.
+6. Click "PDF" or "DOCX" button to download the official approved certificate.
+
+[METHOD 2: From inside the Test Wizard]
+1. Log in as `reviewer1` / `Reviewer@123`.
+2. Open any session by clicking "Enter Data / Wizard".
+3. Review the observation tables (Span, Eccentricity, Repeatability, Discrimination, Safety).
+4. In the top-right header bar, click the green "Approve Report" button.
+5. A confirmation notification confirms approval, and status changes to "APPROVED".
+
+
+================================================================================
+3. DEMO DATA FOR MANUFACTURER REGISTRATION
+================================================================================
+(Use Admin or Technician role -> Navigate to "Manufacturers" -> Click "Add Manufacturer")
+
+[DEMO MANUFACTURER 1]
+- Company Name     : Mettler Toledo India Pvt Ltd
+- Manufacturer Code: MTLR-IND-01
+- Address          : Plot 12, Electronic City Phase 1, Hosur Road, Bengaluru, Karnataka - 560100
+- Contact Person   : Vikramaditya Singh
+- Email            : info.india@mt.com
+- Phone            : +91-80-67890000
+- Country          : India
+- License Number   : LMD/MFG/2026/0892
+
+[DEMO MANUFACTURER 2]
+- Company Name     : Essae-Teraoka Ltd
+- Manufacturer Code: ESSAE-02
+- Address          : 377/2, 10th Cross, IV Phase, Peenya Industrial Area, Bengaluru, Karnataka
+- Contact Person   : Rajesh Nair
+- Email            : contact@essae.com
+- Phone            : +91-80-28394000
+- Country          : India
+- License Number   : LMD/MFG/2025/0411
+
+
+================================================================================
+4. DEMO DATA FOR INSTRUMENT REGISTRATION
+================================================================================
+(Navigate to "Instruments" -> Click "Register New Instrument")
+
+[DEMO INSTRUMENT 1 - Fine Lab Balance (Class II)]
+- Manufacturer   : Select "Mettler Toledo India Pvt Ltd"
+- Model Name     : Excellence Precision Balance XPR-603S
+- Serial Number  : MT-2026-XPR-88192
+- Accuracy Class : Class II (High Accuracy)
+- Max Capacity (Max): 610.0
+- Min Capacity (Min): 0.02
+- Verification Scale Interval (e): 0.001
+- Actual Scale Interval (d): 0.001
+- Unit           : g
+- Temperature Min: 15.0
+- Temperature Max: 30.0
+- Power Supply   : 230V AC, 50Hz
+
+[DEMO INSTRUMENT 2 - Commercial Bench Scale (Class III)]
+- Manufacturer   : Select "Essae-Teraoka Ltd" or "Avery India Ltd"
+- Model Name     : Digital Heavy Duty Bench Scale DS-500
+- Serial Number  : ESS-2026-DS-4410
+- Accuracy Class : Class III (Medium Accuracy)
+- Max Capacity (Max): 30.0
+- Min Capacity (Min): 0.1
+- Verification Scale Interval (e): 0.005
+- Actual Scale Interval (d): 0.005
+- Unit           : kg
+- Temperature Min: -10.0
+- Temperature Max: 40.0
+- Power Supply   : Battery / 230V AC
+
+
+================================================================================
+5. DEMO DATA FOR TEST WIZARD (STEP-BY-STEP OBSERVATION ENTRY)
+================================================================================
+(Navigate to "Test Sessions" -> Click "New Test Session" -> Select Instrument -> Launch Wizard)
+
+--- [SESSION INITIAL ENVIRONMENTAL CONDITIONS] ---
+- Ambient Temperature (°C) : 23.2
+- Relative Humidity (%)   : 52.5
+- Pressure (hPa)          : 1012.8
+- Initial Remarks         : Type Evaluation Test under OIML R 76-1:2006 for Initial Verification
+
+--- [TAB 1: WEIGHING SPAN & LINEARITY TEST READINGS] ---
+Load Point  | Applied Load (kg) | Indication (kg) | Expected Error | OIML MPE Limit | Status
+------------|-------------------|-----------------|----------------|----------------|-------
+Zero Point  | 0.0               | 0.000           | 0.0000 kg      | ± 0.0025 kg    | PASS
+Min Load    | 0.1               | 0.100           | 0.0000 kg      | ± 0.0025 kg    | PASS
+500e        | 2.5               | 2.501           | +0.0010 kg     | ± 0.0025 kg    | PASS
+2000e       | 10.0              | 10.003          | +0.0030 kg     | ± 0.0050 kg    | PASS
+Max Load    | 30.0              | 30.006          | +0.0060 kg     | ± 0.0075 kg    | PASS
+
+--- [TAB 2: ECCENTRIC LOAD TEST READINGS (1/3 Max = 10.0 kg)] ---
+Test Load   : 10.0 kg
+Position 1 - Center      : Indication = 10.000 kg  (Error = 0.0000 kg, MPE = ± 0.0050 kg -> PASS)
+Position 2 - Front Left  : Indication = 10.002 kg  (Error = +0.0020 kg, MPE = ± 0.0050 kg -> PASS)
+Position 3 - Front Right : Indication = 10.001 kg  (Error = +0.0010 kg, MPE = ± 0.0050 kg -> PASS)
+Position 4 - Back Left   : Indication = 9.999 kg   (Error = -0.0010 kg, MPE = ± 0.0050 kg -> PASS)
+Position 5 - Back Right  : Indication = 10.000 kg  (Error = 0.0000 kg, MPE = ± 0.0050 kg -> PASS)
+
+--- [TAB 3: REPEATABILITY TEST READINGS (1/2 Max = 15.0 kg)] ---
+Test Load   : 15.0 kg
+Reading #1  : 15.002 kg
+Reading #2  : 15.004 kg
+Reading #3  : 15.003 kg
+Evaluation  : Max Difference = 0.002 kg (Limit <= MPE 0.0075 kg -> PASS)
+
+--- [TAB 4: DISCRIMINATION TEST READINGS (1.4e = 0.007 kg)] ---
+Base Load             : 5.0 kg
+Indication Before     : 5.000 kg
+Added Weight (1.4e)   : 0.007 kg
+Indication After      : 5.005 kg
+Evaluation            : Change = +0.005 kg (>= 1e change -> PASS)
+
+--- [TAB 5: SAFETY & OVERLOAD PROTECTION CHECK] ---
+Overload Test Load    : 30.045 kg  (> Max + 9e = 30.0 + 0.045)
+Overload Checkbox     : [X] Checked (Display blanked out / error code "OL" displayed -> PASS)
+
+
+================================================================================
+6. COMPLETE ROLE-BY-ROLE TESTING WALKTHROUGH
+================================================================================
+
+--------------------------------------------------------------------------------
+ROLE 1: LAB TECHNICIAN (Username: tech1 / Password: Tech@123)
+--------------------------------------------------------------------------------
+1. Log in at http://localhost:5173 as `tech1`.
+2. Go to "Test Sessions" -> Click "+ New Test Session".
+3. Select an instrument and click "Start Session & Launch Wizard".
+4. Fill in the test readings from Section 5 and click "Save Observations".
+5. Click "Run Final Compliance Check" (Status becomes `UNDER_REVIEW`).
+
+--------------------------------------------------------------------------------
+ROLE 2: METROLOGY REVIEWER (Username: reviewer1 / Password: Reviewer@123)
+--------------------------------------------------------------------------------
+1. Log in at http://localhost:5173 as `reviewer1`.
+2. Go to "Test Sessions" page.
+3. Locate the session submitted by the Lab Technician (`UNDER_REVIEW`).
+4. Click the green "Approve" button directly in the table (OR open the Test Wizard and click "Approve Report" in the top bar).
+5. The session status changes to `APPROVED`.
+6. Click "PDF" or "DOCX" to download official report certificates signed by the Reviewer.
+
+--------------------------------------------------------------------------------
+ROLE 3: CHIEF ADMIN (Username: admin / Password: Admin@123)
+--------------------------------------------------------------------------------
+1. Log in at http://localhost:5173 as `admin`.
+2. View real-time system metrics, session breakdown, and approval rates on the Dashboard.
+3. Add Manufacturers, Register Instruments, and Manage Users.
+4. Admins also have full approval and override permissions for any session.
+
+--------------------------------------------------------------------------------
+ROLE 4: PUBLIC INSPECTOR / VIEWER (Username: viewer1 / Password: Viewer@123)
+--------------------------------------------------------------------------------
+1. Log in as `viewer1`.
+2. Read-only access to search instruments, inspect session compliance, and verify certificates without modification rights.
+
+================================================================================

@@ -1,0 +1,253 @@
+================================================================================
+  NAWI TEST REPORT GENERATOR (SIH PROBLEM STATEMENT 26035)
+  Complete Technical Architecture, Workflow, Flowcharts & PPT Presentation Details
+================================================================================
+
+This document is specifically crafted for presentation slides, teammate sharing, 
+and technical walkthroughs. It contains the complete project architecture, tech stack, 
+OIML R 76-1 standard formulas, ASCII flowcharts, database schemas, and end-to-end workflows.
+
+================================================================================
+SLIDE 1 / SECTION 1: PROJECT IDENTITY & EXECUTIVE SUMMARY
+================================================================================
+
+- Project Title      : Government-Grade NAWI Type Evaluation & Standardized Test Report Generator
+- SIH Problem        : SIH Problem Statement 26035
+- Target Ministry    : Department of Consumer Affairs, Legal Metrology Division, 
+                       Ministry of Consumer Affairs, Food & Public Distribution, Govt of India.
+- Testing Laboratory : National Physical Laboratory (NPL) / Regional Reference Standards Laboratories (RRSL)
+- Standard Complied  : OIML Recommendation R 76-1:2006 & OIML R 76-2 (Test Report Format)
+
+Executive Summary:
+------------------
+Legal Metrology officers verify weighing instruments (balances, commercial scales, weighbridges) 
+before they enter public trade or legal use. This web application automates manual metrological 
+calculations, enforces strict OIML R 76 MPE error thresholds, maintains tamper-proof audit trails, 
+and generates official PDF certificates & editable Word DOCX reports with a single click.
+
+
+================================================================================
+SLIDE 2 / SECTION 2: COMPLETE TECH STACK & LIBRARIES USED
+================================================================================
+
+[FRONTEND LAYER]:
+  - Framework       : React 18 (TypeScript)
+  - Build Tool      : Vite 5 (Lightning-fast HMR and bundling)
+  - Styling & UI    : Vanilla CSS + TailwindCSS 3.4 (Modern dark/light glassmorphic UI)
+  - Analytics Charts: Recharts (Pie Chart for session status & Bar Chart for Accuracy Class distribution)
+  - Icons           : Lucide React (Government portal iconography)
+  - HTTP Client     : Axios (with automatic JWT Bearer token request interceptor & blob handlers)
+
+[BACKEND LAYER]:
+  - Language        : Python 3.13
+  - Framework       : FastAPI (High performance async RESTful API framework)
+  - Data Validation : Pydantic v2 (Strict schema validation for incoming JSON payloads)
+  - Database ORM    : SQLAlchemy (Object Relational Mapping with relationship integrity)
+  - DB Migration    : Alembic (Database schema versioning)
+  - Web Server      : Uvicorn (ASGI server)
+
+[DATABASE LAYER]:
+  - Primary (Local) : SQLite (`nawi_test.db` - zero config instant execution)
+  - Enterprise/Prod : PostgreSQL 15+ (Production level RDBMS)
+
+[SECURITY & AUTHENTICATION]:
+  - Encryption      : OAuth2 JWT Bearer Tokens (HS256 encryption)
+  - Hashing         : Passlib / Bcrypt password hashing
+  - Access Control  : Role-Based Access Control (RBAC - ADMIN, LAB_TECHNICIAN, REVIEWER, VIEWER)
+
+[DOCUMENT GENERATION ENGINES]:
+  - PDF Generator   : ReportLab 4.x (Tamper-proof official Govt certificate with header & signature block)
+  - DOCX Generator  : python-docx (Editable Microsoft Word format for departmental records)
+
+
+================================================================================
+SLIDE 3 / SECTION 3: SYSTEM ARCHITECTURE FLOWCHART
+================================================================================
+
++-----------------------------------------------------------------------------------+
+|                                 USER / BROWSER                                    |
+|   (React 18 Single Page Application running on Vite dev server at http://localhost:5173)|
++------------------------------------------┬----------------------------------------+
+                                           │
+                                           │  HTTPS / REST API Requests
+                                           │  (JSON Payloads + Bearer Token)
+                                           ▼
++-----------------------------------------------------------------------------------+
+|                                FASTAPI BACKEND                                    |
+|                   (Uvicorn server running at http://127.0.0.1:8000)                |
++--------┬───────────────────┬──────────────────────┬──────────────────────┬────────+
+         │                   │                      │                      │
+         ▼                   ▼                      ▼                      ▼
+  +--------------+   +---------------+     +------------------+   +-----------------+
+  | OAuth2 JWT   |   | SQLAlchemy    |     | OIML R76 Engine  |   | Report Generators|
+  | Auth Guard   |   | ORM           |     | (oiml_engine.py) |   | (PDF & DOCX)    |
+  +--------------+   +───────┬───────+     +────────┬─────────+   +────────┬────────+
+                             │                      │                      │
+                             ▼                      ▼                      ▼
+                     +---------------+     +------------------+   +-----------------+
+                     | SQLite /      |     | MPE Calculations |   | Binary Blob     |
+                     | PostgreSQL DB |     | Pass/Fail Status |   | Downloads       |
+                     +---------------+     +------------------+   +-----------------+
+
+
+================================================================================
+SLIDE 4 / SECTION 4: END-TO-END APPLICATION WORKFLOW & FLOWCHART
+================================================================================
+
+WORKFLOW FLOWCHART:
+-------------------
+
+  [START]
+     │
+     ▼
+[Step 1: LOGIN] ───────────► Authenticate user role (ADMIN, TECH, REVIEWER, VIEWER)
+     │
+     ▼
+[Step 2: REGISTER MFG] ─────► Add Manufacturer (Name, Code, Country, License No)
+     │
+     ▼
+[Step 3: REGISTER INST] ────► Add Instrument Specs (Max Cap, Min Cap, e interval, Class I/II/III/IIII)
+     │
+     ▼
+[Step 4: CREATE SESSION] ───► Initialize Test Session (Generates unique code e.g. NAWI-20260824-A1B2C3)
+     │
+     ▼
+[Step 5: TEST WIZARD] ──────► Technician inputs readings:
+     │                         ├─ 1. Weighing Span & Linearity
+     │                         ├─ 2. Eccentric Load Test (5 positions)
+     │                         ├─ 3. Repeatability Test (min 3 readings)
+     │                         ├─ 4. Discrimination Test (1.4e added weight)
+     │                         └─ 5. Safety & Overload Check (> Max + 9e)
+     │
+     ▼
+[Step 6: OIML EVALUATION] ──► Automated OIML Math Engine evaluates errors vs Table 6 MPE limits:
+     │                         ├─ IF Errors <= MPE ──► Session marked PASS
+     │                         └─ IF Errors >  MPE ──► Session marked FAIL
+     │
+     ▼
+[Step 7: SUBMIT FOR REVIEW]─► Technician submits -> Session status becomes "UNDER_REVIEW"
+     │
+     ▼
+[Step 8: REVIEWER APPROVAL]─► Reviewer / Admin checks observations & clicks "APPROVE"
+     │                         └─ Status becomes "APPROVED"
+     ▼
+[Step 9: EXPORT CERTIFICATE]► Single click download:
+     │                         ├─ Official Tamper-proof PDF Certificate (ReportLab)
+     │                         └─ Editable Microsoft Word Document (python-docx)
+     ▼
+   [END]
+
+
+================================================================================
+SLIDE 5 / SECTION 5: OIML R 76-1 MATHEMATICAL CALCULATIONS & MPE FORMULAS
+================================================================================
+
+Scale Interval Parameter:
+-------------------------
+Load 'm' is evaluated in terms of scale interval 'e' (where load_in_e = m / e).
+
+OIML R 76-1 Table 6 Initial Verification MPE Limits:
+
+1. CLASS I (Special Accuracy - Fine Balances):
+   - 0 <= m/e <= 50,000      ==> MPE = ± 0.5 e
+   - 50,000 < m/e <= 200,000 ==> MPE = ± 1.0 e
+   - m/e > 200,000           ==> MPE = ± 1.5 e
+
+2. CLASS II (High Accuracy - Lab Balances):
+   - 0 <= m/e <= 5,000       ==> MPE = ± 0.5 e
+   - 5,000 < m/e <= 20,000   ==> MPE = ± 1.0 e
+   - 20,000 < m/e <= 100,000 ==> MPE = ± 1.5 e
+
+3. CLASS III (Medium Accuracy - Commercial Scales & Weighbridges):
+   - 0 <= m/e <= 500         ==> MPE = ± 0.5 e
+   - 500 < m/e <= 2,000      ==> MPE = ± 1.0 e
+   - 2,000 < m/e <= 10,000   ==> MPE = ± 1.5 e
+
+4. CLASS IIII (Ordinary Accuracy - Industrial Bulk Scales):
+   - 0 <= m/e <= 50          ==> MPE = ± 0.5 e
+   - 50 < m/e <= 200         ==> MPE = ± 1.0 e
+   - 200 < m/e <= 1,000      ==> MPE = ± 1.5 e
+
+Evaluation Math Equations:
+--------------------------
+1. Indication Error (E) : E = Indication - Load  (or E = Indication + 0.5e - Delta_L - Load)
+2. Repeatability Diff   : Difference = Max(Readings) - Min(Readings) <= MPE
+3. Eccentricity Test    : Tested at 5 platform positions using 1/3 Max load
+4. Discrimination Test  : Adding 1.4e extra load must cause display change of >= 1.0e
+
+
+================================================================================
+SLIDE 6 / SECTION 6: DATABASE DOMAIN ENTITIES & SCHEMAS
+================================================================================
+
+1. User Entity (`users` table):
+   - id, username, email, full_name, hashed_password, role (ADMIN/LAB_TECHNICIAN/REVIEWER/VIEWER), lab_code, created_at
+
+2. Manufacturer Entity (`manufacturers` table):
+   - id, name, code, address, contact_person, email, phone, country, license_number, created_at
+
+3. Instrument Entity (`instruments` table):
+   - id, manufacturer_id, model_name, serial_number, accuracy_class (CLASS_I/II/III/IIII), max_capacity, min_capacity, verification_scale_interval (e), actual_scale_interval (d), unit, temperature_min, temperature_max
+
+4. Test Session Entity (`test_sessions` table):
+   - id, session_code, instrument_id, technician_id, reviewer_id, status (DRAFT/IN_PROGRESS/UNDER_REVIEW/APPROVED/REJECTED), test_date, temperature_c, humidity_percent, pressure_hpa, overall_pass
+
+5. Test Observation Entity (`test_observations` table):
+   - id, session_id, test_type (SPAN/ECCENTRICITY/REPEATABILITY/DISCRIMINATION/SAFETY), raw_data_json, evaluated_data_json, is_passed
+
+6. Audit Log Entity (`audit_logs` table):
+   - id, user_id, action, resource, details_json, ip_address, timestamp
+
+
+================================================================================
+SLIDE 7 / SECTION 7: REST API ENDPOINTS SUMMARY
+================================================================================
+
+HTTP Method | Endpoint Path                         | Description
+------------|---------------------------------------|------------------------------------------------
+GET         | /                                     | System status & Govt lab identification
+POST        | /api/v1/auth/login                    | Authenticate user & return JWT token
+GET         | /api/v1/auth/me                       | Get current logged-in user profile
+GET         | /api/v1/users/                        | List all system users (Admin only)
+POST        | /api/v1/users/                        | Create a new user (Admin only)
+GET         | /api/v1/manufacturers/                | List registered scale manufacturers
+POST        | /api/v1/manufacturers/                | Register a new manufacturer
+GET         | /api/v1/instruments/                  | List registered weighing instruments
+POST        | /api/v1/instruments/                  | Register a new instrument model
+GET         | /api/v1/sessions/                     | List test sessions (with status filter)
+POST        | /api/v1/sessions/                     | Create a new test session
+GET         | /api/v1/sessions/{id}                 | Get full session details & observations
+POST        | /api/v1/sessions/{id}/observations    | Record test wizard observations & run OIML math
+POST        | /api/v1/sessions/{id}/evaluate        | Finalize session compliance check
+PATCH       | /api/v1/sessions/{id}                 | Update session status (Approve/Reject by Reviewer)
+GET         | /api/v1/sessions/{id}/pdf             | Generate & stream official PDF report
+GET         | /api/v1/sessions/{id}/docx            | Generate & stream editable DOCX report
+POST        | /api/v1/sessions/mpe-calculator       | Live inline MPE calculator endpoint
+GET         | /api/v1/dashboard/stats               | Analytics metrics & charts data breakdown
+
+
+================================================================================
+SLIDE 8 / SECTION 8: DEFAULT DEMO CREDENTIALS & QUICK START
+================================================================================
+
+Role             | Username   | Password     | Scope of Privileges
+-----------------|------------|--------------|--------------------------------------------------
+Admin            | admin      | Admin@123    | Full system control, User management, Approvals
+Lab Technician   | tech1      | Tech@123     | Create Sessions, Test Wizard, Observation entry
+Reviewer         | reviewer1  | Reviewer@123 | Inspect Observations, Approve / Reject Reports
+Viewer           | viewer1    | Viewer@123   | Read-only inspection & Certificate search
+
+Quick Start Commands:
+---------------------
+1. Start Backend FastAPI Server:
+   $env:PYTHONPATH="."
+   python backend/seed_data.py
+   python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+
+2. Start Frontend React Dev Server:
+   cd frontend
+   npm run dev
+
+3. Open Application in Browser:
+   http://localhost:5173
+================================================================================
