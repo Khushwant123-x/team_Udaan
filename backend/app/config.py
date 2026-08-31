@@ -3,12 +3,14 @@ from pydantic import AnyHttpUrl, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+import os
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "NAWI Test Report Generator (OIML R 76)"
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "sqlite:///./nawi_test.db"
+    DATABASE_URL: str = "sqlite:////tmp/nawi_test.db" if (os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME")) else "sqlite:///./nawi_test.db"
     
     # JWT Auth
     JWT_SECRET_KEY: str = "nawi-oiml-r76-legal-metrology-secret-key-2026"
@@ -17,7 +19,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Storage & Labs
-    UPLOAD_DIR: str = "./uploads"
+    UPLOAD_DIR: str = "/tmp/uploads" if (os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME")) else "./uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
     LAB_CODE: str = "NPL-DELHI"
     LAB_NAME: str = "National Physical Laboratory / Legal Metrology Dept"
