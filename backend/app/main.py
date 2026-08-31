@@ -4,11 +4,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.config import settings
+
+# Handle Vercel serverless environment paths (Vercel filesystem is read-only except /tmp)
+if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+    if settings.DATABASE_URL.startswith("sqlite"):
+        settings.DATABASE_URL = "sqlite:////tmp/nawi_test.db"
+    settings.UPLOAD_DIR = "/tmp/uploads"
+
 from backend.app.database import engine, Base
 from backend.app.api import auth, users, manufacturers, instruments, sessions, dashboard
 
-# Create DB tables
+# Create DB tables & Auto-seed initial data
 Base.metadata.create_all(bind=engine)
+try:
+    from backend.seed_data import seed_db
+    seed_db()
+except Exception as e:
+    print(f"Auto-seeding warning: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -20,7 +32,7 @@ app = FastAPI(
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
