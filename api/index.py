@@ -1,7 +1,9 @@
 import sys
 import os
 
-# Ensure the root project directory is in Python path for backend imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Ensure root workspace directory is in sys.path for backend package resolution
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if root_dir not in sys.path:
+    sys.path.insert(0, root_dir)
 
 from backend.app.main import app
