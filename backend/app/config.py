@@ -1,6 +1,6 @@
 import os
 import json
-from typing import List, Union
+from typing import List, Any
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "sqlite:////tmp/nawi_test.db" if (os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME")) else "sqlite:///./nawi_test.db"
+    DATABASE_URL: str = ""
     
     # JWT Auth
     JWT_SECRET_KEY: str = "nawi-oiml-r76-legal-metrology-secret-key-2026"
@@ -19,22 +19,38 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Storage & Labs
-    UPLOAD_DIR: str = "/tmp/uploads" if (os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME")) else "./uploads"
+    UPLOAD_DIR: str = ""
     MAX_UPLOAD_SIZE_MB: int = 10
     LAB_CODE: str = "NPL-DELHI"
     LAB_NAME: str = "National Physical Laboratory / Legal Metrology Dept"
     LAB_LOCATION: str = "New Delhi, India"
     
     # CORS
-    BACKEND_CORS_ORIGINS: Union[List[str], str] = [
+    BACKEND_CORS_ORIGINS: Any = [
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:8000"
     ]
 
+    @property
+    def get_database_url(self) -> str:
+        if self.DATABASE_URL and self.DATABASE_URL.strip():
+            return self.DATABASE_URL
+        if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+            return "sqlite:////tmp/nawi_test.db"
+        return "sqlite:///./nawi_test.db"
+
+    @property
+    def get_upload_dir(self) -> str:
+        if self.UPLOAD_DIR and self.UPLOAD_DIR.strip():
+            return self.UPLOAD_DIR
+        if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+            return "/tmp/uploads"
+        return "./uploads"
+
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+    def assemble_cors_origins(cls, v: Any) -> List[str]:
         if isinstance(v, str):
             if not v or v.strip() == "":
                 return ["*"]
@@ -45,7 +61,7 @@ class Settings(BaseSettings):
                     pass
             return [i.strip() for i in v.split(",") if i.strip()]
         elif isinstance(v, list):
-            return v
+            return [str(item) for item in v]
         return ["*"]
 
     model_config = SettingsConfigDict(

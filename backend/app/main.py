@@ -4,13 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.config import settings
-
-# Handle Vercel serverless environment paths (Vercel filesystem is read-only except /tmp)
-if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
-    if settings.DATABASE_URL.startswith("sqlite"):
-        settings.DATABASE_URL = "sqlite:////tmp/nawi_test.db"
-    settings.UPLOAD_DIR = "/tmp/uploads"
-
 from backend.app.database import engine, Base
 from backend.app.api import auth, users, manufacturers, instruments, sessions, dashboard
 
@@ -39,8 +32,9 @@ app.add_middleware(
 )
 
 # Static Uploads directory
-os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+upload_dir = settings.get_upload_dir
+os.makedirs(upload_dir, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=upload_dir), name="uploads")
 
 # Mount Routers
 app.include_router(auth.router, prefix=settings.API_V1_STR)
