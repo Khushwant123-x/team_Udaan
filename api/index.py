@@ -1,9 +1,12 @@
 import sys
 import os
 
-# Ensure root workspace directory is in sys.path for backend package resolution
-root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if root_dir not in sys.path:
-    sys.path.insert(0, root_dir)
+file_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(file_dir)
+cwd = os.getcwd()
+
+for p in [cwd, file_dir, parent_dir]:
+    if p and p not in sys.path:
+        sys.path.insert(0, p)
 
 from backend.app.main import app

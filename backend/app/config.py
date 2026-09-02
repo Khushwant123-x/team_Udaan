@@ -37,7 +37,14 @@ class Settings(BaseSettings):
     def get_database_url(self) -> str:
         if self.DATABASE_URL and self.DATABASE_URL.strip():
             return self.DATABASE_URL
-        if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        if (
+            os.getenv("VERCEL")
+            or os.getenv("VERCEL_ENV")
+            or os.getenv("VERCEL_REGION")
+            or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
+            or os.getenv("LAMBDA_TASK_ROOT")
+            or not os.access(".", os.W_OK)
+        ):
             return "sqlite:////tmp/nawi_test.db"
         return "sqlite:///./nawi_test.db"
 
@@ -45,7 +52,14 @@ class Settings(BaseSettings):
     def get_upload_dir(self) -> str:
         if self.UPLOAD_DIR and self.UPLOAD_DIR.strip():
             return self.UPLOAD_DIR
-        if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        if (
+            os.getenv("VERCEL")
+            or os.getenv("VERCEL_ENV")
+            or os.getenv("VERCEL_REGION")
+            or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
+            or os.getenv("LAMBDA_TASK_ROOT")
+            or not os.access(".", os.W_OK)
+        ):
             return "/tmp/uploads"
         return "./uploads"
 

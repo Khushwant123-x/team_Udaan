@@ -7,7 +7,7 @@ from jose import jwt
 from passlib.context import CryptContext
 from backend.app.config import settings
 
-# Pure Python pbkdf2_sha256 CryptContext with zero C-extension dependencies
+# Pure Python pbkdf2_sha256 CryptContext
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
@@ -15,6 +15,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     if not hashed_password or not plain_password:
         return False
     try:
+        if hashed_password.startswith("$pbkdf2-sha256$"):
+            return pwd_context.verify(plain_password, hashed_password)
+        if hashed_password.startswith("$2a$") or hashed_password.startswith("$2b$"):
+            try:
+                import bcrypt
+                return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+            except Exception:
+                pass
         return pwd_context.verify(plain_password, hashed_password)
     except Exception:
         return plain_password == hashed_password

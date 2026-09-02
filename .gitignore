@@ -63,3 +63,5 @@ frontend/build/
 uploads/*
 !uploads/.gitkeep
 scratch/
+
+.vercel

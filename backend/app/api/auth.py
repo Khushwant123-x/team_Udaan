@@ -25,10 +25,14 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(subject=user.username)
     refresh_token = create_refresh_token(subject=user.username)
 
-    # Log audit
-    audit = AuditLog(user_id=user.id, action="LOGIN", resource="AUTH", details_json={"username": user.username})
-    db.add(audit)
-    db.commit()
+    # Log audit safely
+    try:
+        audit = AuditLog(user_id=user.id, action="LOGIN", resource="AUTH", details_json={"username": user.username})
+        db.add(audit)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Audit log write warning: {e}")
 
     return {
         "access_token": access_token,

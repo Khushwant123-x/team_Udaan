@@ -18,7 +18,24 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
+def ensure_db_initialized():
+    try:
+        Base.metadata.create_all(bind=engine)
+        db = SessionLocal()
+        try:
+            from backend.app.models.domain import User
+            admin_user = db.query(User).filter(User.username == "admin").first()
+            if not admin_user:
+                from backend.seed_data import seed_db
+                seed_db()
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"Database init warning: {e}")
+
+
 def get_db():
+    ensure_db_initialized()
     db = SessionLocal()
     try:
         yield db

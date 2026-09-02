@@ -4,16 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.config import settings
-from backend.app.database import engine, Base
+from backend.app.database import engine, Base, ensure_db_initialized
 from backend.app.api import auth, users, manufacturers, instruments, sessions, dashboard
 
-# Create DB tables & Auto-seed initial data
-Base.metadata.create_all(bind=engine)
-try:
-    from backend.seed_data import seed_db
-    seed_db()
-except Exception as e:
-    print(f"Auto-seeding warning: {e}")
+# Ensure tables & seed data on startup
+ensure_db_initialized()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,6 +25,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from fastapi.responses import JSONResponse
+import traceback
+
+@app.exception_handler(Exception)
+async def debug_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error_message": str(exc),
+            "error_type": type(exc).__name__,
+            "traceback": traceback.format_exc()
+        }
+    )
 
 # Static Uploads directory
 upload_dir = settings.get_upload_dir
