@@ -23,26 +23,40 @@ def ensure_db_initialized():
         Base.metadata.create_all(bind=engine)
         db = SessionLocal()
         try:
-            from backend.app.models.domain import User
-            admin_user = db.query(User).filter(User.username == "admin").first()
-            if not admin_user:
+            from backend.app.models.domain import User, UserRole
+            from backend.app.core.security import get_password_hash
+
+            default_users = [
+                ("admin", "Admin@123", "admin@legalmetrology.gov.in", "Chief Administrator", UserRole.ADMIN),
+                ("tech1", "Tech@123", "tech1@legalmetrology.gov.in", "Rajesh Sharma (Senior Technician)", UserRole.LAB_TECHNICIAN),
+                ("reviewer1", "Reviewer@123", "reviewer1@legalmetrology.gov.in", "Dr. V. K. Verma (Metrology Reviewer)", UserRole.REVIEWER),
+            ]
+
+            updated = False
+            for username, password, email, full_name, role in default_users:
+                u = db.query(User).filter(User.username == username).first()
+                if not u:
+                    u = User(
+                        username=username,
+                        email=email,
+                        full_name=full_name,
+                        hashed_password=get_password_hash(password),
+                        role=role,
+                        lab_code="NPL-DELHI"
+                    )
+                    db.add(u)
+                    updated = True
+                elif u.hashed_password.startswith("$2b$") or u.hashed_password.startswith("$2a$"):
+                    u.hashed_password = get_password_hash(password)
+                    updated = True
+
+            if updated:
+                db.commit()
+
+            from backend.app.models.domain import Manufacturer
+            if not db.query(Manufacturer).first():
                 from backend.seed_data import seed_db
                 seed_db()
-            else:
-                from backend.app.core.security import get_password_hash
-                default_credentials = {
-                    "admin": "Admin@123",
-                    "tech1": "Tech@123",
-                    "reviewer1": "Reviewer@123"
-                }
-                updated = False
-                for username, plain_pwd in default_credentials.items():
-                    user = db.query(User).filter(User.username == username).first()
-                    if user and (user.hashed_password.startswith("$2b$") or user.hashed_password.startswith("$2a$")):
-                        user.hashed_password = get_password_hash(plain_pwd)
-                        updated = True
-                if updated:
-                    db.commit()
         finally:
             db.close()
     except Exception as e:
