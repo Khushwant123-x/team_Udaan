@@ -45,7 +45,12 @@ class Settings(BaseSettings):
             or os.getenv("LAMBDA_TASK_ROOT")
             or not os.access(".", os.W_OK)
         ):
-            return "sqlite:////tmp/nawi_test.db"
+            import tempfile
+            tmp_dir = tempfile.gettempdir()
+            db_path = os.path.join(tmp_dir, "nawi_test.db")
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+            clean_path = db_path.replace("\\", "/")
+            return f"sqlite:///{clean_path}"
         return "sqlite:///./nawi_test.db"
 
     @property
@@ -60,7 +65,10 @@ class Settings(BaseSettings):
             or os.getenv("LAMBDA_TASK_ROOT")
             or not os.access(".", os.W_OK)
         ):
-            return "/tmp/uploads"
+            import tempfile
+            up_dir = os.path.join(tempfile.gettempdir(), "uploads")
+            os.makedirs(up_dir, exist_ok=True)
+            return up_dir
         return "./uploads"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")

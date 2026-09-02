@@ -1,8 +1,16 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from backend.app.config import settings
 
 db_url = settings.get_database_url
+
+if db_url.startswith("sqlite:///"):
+    db_file = db_url.replace("sqlite:///", "")
+    if db_file and db_file != ":memory:":
+        parent_dir = os.path.dirname(os.path.abspath(db_file))
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
 
 connect_args = {}
 if db_url.startswith("sqlite"):
