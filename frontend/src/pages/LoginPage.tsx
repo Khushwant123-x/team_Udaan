@@ -31,7 +31,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-[82vh] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 bg-slate-900/50 relative overflow-hidden">
+    <div className="min-h-[82vh] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 bg-slate-900/50 relative overflow-hidden" 
+    style={{ backgroundImage: "url('/photo.jpeg')"}}>
       
       {/* Standalone PROTOTYPE Seal Sticker - Positioned directly below "English / हिन्दी" text on top-right */}
       <div className="absolute top-3 right-4 sm:right-8 lg:right-16 z-30 transform hover:rotate-6 hover:scale-105 transition-transform duration-300 drop-shadow-2xl pointer-events-auto">
