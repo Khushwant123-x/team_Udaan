@@ -48,14 +48,7 @@ class Settings(BaseSettings):
             or os.getenv("LAMBDA_TASK_ROOT")
             or not os.access(".", os.W_OK)
         ):
-            import tempfile
-            tmp_dir = tempfile.gettempdir()
-            db_path = os.path.join(tmp_dir, "nawi_test.db")
-            os.makedirs(os.path.dirname(db_path), exist_ok=True)
-            clean_path = db_path.replace("\\", "/")
-            if not clean_path.startswith("/"):
-                clean_path = "/" + clean_path
-            return f"sqlite:///{clean_path}"
+            return "sqlite:///:memory:"
         return "sqlite:///./nawi_test.db"
 
     @property
