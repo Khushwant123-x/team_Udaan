@@ -1,17 +1,47 @@
 import React, { useState } from 'react';
-import { Lock, User as UserIcon, AlertCircle, KeyRound, Award } from 'lucide-react';
+import {
+  Lock,
+  User as UserIcon,
+  AlertCircle,
+  Wrench,
+  UserPlus,
+  FileText,
+  Settings,
+  UserCheck,
+  Eye,
+  EyeOff,
+  LogIn,
+  ShieldCheck
+} from 'lucide-react';
 import { authApi } from '../services/api';
-import { PrototypeSeal } from '../components/PrototypeSeal';
+import { AshokaEmblem } from '../components/AshokaEmblem';
 
 interface LoginPageProps {
   onLoginSuccess: () => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [selectedRole, setSelectedRole] = useState<'officer' | 'technician' | 'reviewer'>('officer');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('Admin@123');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const handleRoleSelect = (role: 'officer' | 'technician' | 'reviewer') => {
+    setSelectedRole(role);
+    if (role === 'officer') {
+      setUsername('admin');
+      setPassword('Admin@123');
+    } else if (role === 'technician') {
+      setUsername('tech1');
+      setPassword('Tech@123');
+    } else if (role === 'reviewer') {
+      setUsername('reviewer1');
+      setPassword('Reviewer@123');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,115 +61,202 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-[82vh] flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 bg-slate-900/50 relative overflow-hidden">
+    <div className="min-h-screen nawi-farm-bg flex items-center justify-center p-4 sm:p-6 relative overflow-hidden font-sans">
       
-      {/* Standalone PROTOTYPE Seal Sticker - Positioned directly below "English / हिन्दी" text on top-right */}
-      <div className="absolute top-3 right-4 sm:right-8 lg:right-16 z-30 transform hover:rotate-6 hover:scale-105 transition-transform duration-300 drop-shadow-2xl pointer-events-auto">
-        <PrototypeSeal size={175} />
-      </div>
+      {/* Decorative backdrop elements */}
+      <div className="absolute top-12 left-12 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-12 right-12 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      {/* Main Portal Container: Centered G2G Form Card */}
-      <div className="max-w-md mx-auto w-full pt-4">
-        <div className="bg-slate-900 border border-slate-800 py-8 px-6 shadow-2xl rounded-2xl sm:px-9 space-y-6 relative overflow-hidden">
+      {/* Main Glass Card Container */}
+      <div className="max-w-[480px] w-full nawi-glass-card rounded-[28px] p-6 sm:p-9 shadow-2xl space-y-6 relative border border-white/90 animate-in zoom-in-95 duration-300">
+        
+        {/* Ashoka Emblem & Title Section */}
+        <div className="text-center space-y-2">
+          <div className="flex justify-center mb-1">
+            <AshokaEmblem className="w-12 h-12 text-[#0A2540]" size={48} />
+          </div>
+
+          <h1 className="text-2xl sm:text-[26px] font-black text-[#0A2540] tracking-tight leading-none">
+            NAWI Test Report Generator
+          </h1>
           
-          {/* Top Tricolor Accent Line */}
-          <div className="absolute top-0 left-0 right-0 gov-tricolor-bar" />
+          <p className="text-xs font-semibold text-slate-600 leading-tight">
+            Digital Test Report Generation & Management System
+          </p>
 
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-              <KeyRound className="w-4 h-4 text-amber-400" />
-              <span>G2G Officer Sign-In Portal</span>
+          <p className="text-xs font-bold text-blue-800 tracking-wide">
+            As per OIML Recommendation R-76
+          </p>
+        </div>
+
+        {/* Tab Switcher: Sign In vs Sign Up / Register */}
+        <div className="bg-slate-100/90 p-1.5 rounded-2xl flex items-center shadow-inner">
+          <button
+            type="button"
+            onClick={() => setActiveTab('signin')}
+            className={`flex-1 py-2.5 px-3 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center space-x-2 ${
+              activeTab === 'signin'
+                ? 'bg-white text-blue-700 shadow-md'
+                : 'text-slate-500 hover:text-slate-800 font-semibold'
+            }`}
+          >
+            <Wrench className="w-4 h-4 text-blue-600" />
+            <span>Sign In</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setActiveTab('signup')}
+            className={`flex-1 py-2.5 px-3 text-xs font-extrabold rounded-xl transition-all flex items-center justify-center space-x-2 ${
+              activeTab === 'signup'
+                ? 'bg-white text-blue-700 shadow-md'
+                : 'text-slate-500 hover:text-slate-800 font-semibold'
+            }`}
+          >
+            <UserPlus className="w-4 h-4 text-blue-600" />
+            <span>Sign Up / Register</span>
+          </button>
+        </div>
+
+        {/* Divider Header: SIGN IN AS */}
+        <div className="relative flex py-1 items-center">
+          <div className="flex-grow border-t border-slate-200"></div>
+          <span className="flex-shrink mx-3 text-[11px] font-extrabold text-slate-700 uppercase tracking-wider">
+            SIGN IN AS
+          </span>
+          <div className="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        {/* Role Selection Cards Grid */}
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+          
+          {/* Test Officer */}
+          <button
+            type="button"
+            onClick={() => handleRoleSelect('officer')}
+            className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center space-y-1.5 ${
+              selectedRole === 'officer'
+                ? 'bg-blue-50/90 border-2 border-blue-500 text-blue-900 shadow-sm font-extrabold scale-[1.02]'
+                : 'bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300 font-semibold'
+            }`}
+          >
+            <div className={`p-2 rounded-xl ${selectedRole === 'officer' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+              <FileText className="w-5 h-5" />
             </div>
-            <span className="text-[10px] bg-blue-950 text-blue-300 font-mono px-2 py-0.5 rounded border border-blue-800 font-semibold">
-              SSL SECURED
-            </span>
-          </div>
+            <span className="text-[11px] tracking-tight">Test Officer</span>
+          </button>
 
-          {error && (
-            <div className="bg-rose-950/80 border border-rose-800 text-rose-200 text-xs p-3 rounded-lg flex items-center space-x-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-              <span>{error}</span>
+          {/* Technician */}
+          <button
+            type="button"
+            onClick={() => handleRoleSelect('technician')}
+            className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center space-y-1.5 ${
+              selectedRole === 'technician'
+                ? 'bg-blue-50/90 border-2 border-blue-500 text-blue-900 shadow-sm font-extrabold scale-[1.02]'
+                : 'bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300 font-semibold'
+            }`}
+          >
+            <div className={`p-2 rounded-xl ${selectedRole === 'technician' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+              <Settings className="w-5 h-5" />
             </div>
-          )}
+            <span className="text-[11px] tracking-tight">Technician</span>
+          </button>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">
-                Official Username / Lab Officer ID
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                  <UserIcon className="w-4 h-4 text-amber-400" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Enter officer username"
-                />
-              </div>
+          {/* Reviewer */}
+          <button
+            type="button"
+            onClick={() => handleRoleSelect('reviewer')}
+            className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center space-y-1.5 ${
+              selectedRole === 'reviewer'
+                ? 'bg-blue-50/90 border-2 border-blue-500 text-blue-900 shadow-sm font-extrabold scale-[1.02]'
+                : 'bg-white/80 border-slate-200 text-slate-600 hover:bg-white hover:border-slate-300 font-semibold'
+            }`}
+          >
+            <div className={`p-2 rounded-xl ${selectedRole === 'reviewer' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+              <UserCheck className="w-5 h-5" />
             </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1">Authorization Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                  <Lock className="w-4 h-4 text-amber-400" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Enter password"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-extrabold rounded-lg text-xs tracking-wider uppercase transition shadow-lg disabled:opacity-50 mt-2"
-            >
-              {loading ? 'Authenticating with Central Registry...' : 'Sign In to Official Portal'}
-            </button>
-          </form>
-
-          {/* Preset Roles Helper */}
-          <div className="border-t border-slate-800 pt-4 text-slate-400 text-[11px] space-y-2">
-            <p className="font-bold text-amber-400 flex items-center justify-between">
-              <span>Quick Test Role Selectors:</span>
-              <Award className="w-3.5 h-3.5 text-amber-400" />
-            </p>
-            <div className="grid grid-cols-3 gap-2 font-mono text-[10px]">
-              <button
-                type="button"
-                onClick={() => { setUsername('admin'); setPassword('Admin@123'); }}
-                className="bg-slate-950 hover:bg-slate-800 text-amber-300 p-1.5 rounded border border-slate-800 text-center font-bold transition hover:border-amber-500"
-              >
-                ADMIN
-              </button>
-              <button
-                type="button"
-                onClick={() => { setUsername('tech1'); setPassword('Tech@123'); }}
-                className="bg-slate-950 hover:bg-slate-800 text-emerald-300 p-1.5 rounded border border-slate-800 text-center font-bold transition hover:border-emerald-500"
-              >
-                TECHNICIAN
-              </button>
-              <button
-                type="button"
-                onClick={() => { setUsername('reviewer1'); setPassword('Reviewer@123'); }}
-                className="bg-slate-950 hover:bg-slate-800 text-blue-300 p-1.5 rounded border border-slate-800 text-center font-bold transition hover:border-blue-500"
-              >
-                REVIEWER
-              </button>
-            </div>
-          </div>
+            <span className="text-[11px] tracking-tight">Reviewer</span>
+          </button>
 
         </div>
+
+        {/* Error Alert Message */}
+        {error && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-800 text-xs p-3 rounded-xl flex items-center space-x-2 animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Login Credentials Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* Username Input */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
+              <UserIcon className="w-4 h-4 text-blue-600" />
+              <span>Official Username / Officer ID</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="block w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                placeholder="Enter Officer ID"
+              />
+            </div>
+          </div>
+
+          {/* Password Input with Show/Hide Toggle */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center space-x-1.5">
+              <Lock className="w-4 h-4 text-blue-600" />
+              <span>Authorization Password</span>
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="block w-full pl-3.5 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
+                placeholder="Enter Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Action Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 px-4 bg-[#0070f3] hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs tracking-wider uppercase transition shadow-lg shadow-blue-500/25 disabled:opacity-50 flex items-center justify-center space-x-2 mt-2"
+          >
+            <LogIn className="w-4 h-4" />
+            <span>{loading ? 'Authenticating Officer...' : 'SIGN IN TO OFFICIAL PORTAL'}</span>
+          </button>
+
+        </form>
+
+        {/* Footer Security Badge & Subtext */}
+        <div className="pt-2 text-center border-t border-slate-200/80 space-y-0.5">
+          <p className="text-xs font-bold text-blue-900 flex items-center justify-center space-x-1.5">
+            <Lock className="w-3.5 h-3.5 text-blue-600 inline-block" />
+            <span>Secure Digital Test Reporting Infrastructure</span>
+          </p>
+          <p className="text-[11px] text-slate-500 font-semibold">
+            Based on OIML Recommendation R-76
+          </p>
+        </div>
+
       </div>
 
     </div>
