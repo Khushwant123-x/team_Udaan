@@ -1,32 +1,35 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.pool import StaticPool
 from backend.app.config import settings
 
 db_url = settings.get_database_url
 
-if db_url.startswith("sqlite:///"):
-    db_file = db_url.replace("sqlite:///", "")
-    if db_file and db_file != ":memory:":
-        parent_dir = os.path.dirname(os.path.abspath(db_file))
-        if parent_dir:
-            os.makedirs(parent_dir, exist_ok=True)
-
 connect_args = {}
+engine_kwargs = {"pool_pre_ping": True}
+
 if db_url.startswith("sqlite"):
-    connect_args = {"check_same_thread": False}
+    connect_args = {"check_same_thread": False, "timeout": 30}
+    if ":memory:" in db_url:
+        engine_kwargs["poolclass"] = StaticPool
 
 engine = create_engine(
     db_url,
     connect_args=connect_args,
-    pool_pre_ping=True
+    **engine_kwargs
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+_db_initialized = False
+
 
 def ensure_db_initialized():
+    global _db_initialized
+    if _db_initialized:
+        return
     try:
         Base.metadata.create_all(bind=engine)
         db = SessionLocal()
@@ -67,6 +70,7 @@ def ensure_db_initialized():
                 seed_db()
         finally:
             db.close()
+        _db_initialized = True
     except Exception as e:
         print(f"Database init warning: {e}")
 
@@ -78,3 +82,4 @@ def get_db():
         yield db
     finally:
         db.close()
+

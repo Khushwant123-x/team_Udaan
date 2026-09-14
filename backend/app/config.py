@@ -36,7 +36,10 @@ class Settings(BaseSettings):
     @property
     def get_database_url(self) -> str:
         if self.DATABASE_URL and self.DATABASE_URL.strip():
-            return self.DATABASE_URL
+            url = self.DATABASE_URL.strip()
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
+            return url
         if (
             os.getenv("VERCEL")
             or os.getenv("VERCEL_ENV")
@@ -50,6 +53,8 @@ class Settings(BaseSettings):
             db_path = os.path.join(tmp_dir, "nawi_test.db")
             os.makedirs(os.path.dirname(db_path), exist_ok=True)
             clean_path = db_path.replace("\\", "/")
+            if not clean_path.startswith("/"):
+                clean_path = "/" + clean_path
             return f"sqlite:///{clean_path}"
         return "sqlite:///./nawi_test.db"
 
