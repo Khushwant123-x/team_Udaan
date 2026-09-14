@@ -40,16 +40,7 @@ class Settings(BaseSettings):
             if url.startswith("postgres://"):
                 url = url.replace("postgres://", "postgresql://", 1)
             return url
-        if (
-            os.getenv("VERCEL")
-            or os.getenv("VERCEL_ENV")
-            or os.getenv("VERCEL_REGION")
-            or os.getenv("AWS_LAMBDA_FUNCTION_NAME")
-            or os.getenv("LAMBDA_TASK_ROOT")
-            or not os.access(".", os.W_OK)
-        ):
-            return "sqlite:///:memory:"
-        return "sqlite:///./nawi_test.db"
+        return "sqlite:///:memory:"
 
     @property
     def get_upload_dir(self) -> str:
